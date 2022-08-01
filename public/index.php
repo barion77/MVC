@@ -2,8 +2,6 @@
 
 include '../app/classes/dev.php';
 
-use app\core\Route;
-
 spl_autoload_register(function ($class) {
     $path = str_replace('\\', '/', '../' . $class . '.php');
     if (file_exists($path)) {
@@ -13,5 +11,4 @@ spl_autoload_register(function ($class) {
 
 session_start();
 
-$route = new Route;
-$route->run();
+require '../app/config/routes.php';
