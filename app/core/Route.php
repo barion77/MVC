@@ -2,59 +2,44 @@
 
 namespace app\core;
 
-use app\core\View;
+use app\config\Config;
+use ErrorException;
 
-class Route 
+class Route
 {
-    protected $routes = [];
-    protected $params = [];
+    private static $flag = false;
 
+    private const GET = 'GET';
+    private const POST = 'POST';
 
-    public function __construct()
+    public static function get($uri, $params)
     {
-        $arr = require '../app/config/routes.php';
-        foreach ($arr as $key => $value) {
-            $this->add($key, $value);
-        }
-    }
+        $current_uri = trim($_SERVER['REQUEST_URI'], '/');
+        $route = '#^' . trim($uri, '/') . '$#';
 
-    public function add($route, $params)
-    {
-        $route = '#^' . $route . '$#';
-        $this->routes[$route] = $params;
-    }
-
-    public function match()
-    {
-        $url = trim($_SERVER['REQUEST_URI'], '/');
-        foreach ($this->routes as $key => $value) {
-            if (preg_match($key, $url, $matches)) {
-                $this->params = $value;
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public function run()
-    {
-        if ($this->match()) {
-            $path = 'app\controllers\\' . $this->params['controller'];
-            if (class_exists($path)) {
-                $action = $this->params['action'];
-                if (method_exists($path, $action)) {
-                    $controller = new $path($this->params);
+        if (preg_match($route, $current_uri, $matches)) {
+            $controller = 'app\controllers\\' . explode('@', $params)[0];
+            $action = explode('@', $params)[1];
+            if (class_exists($controller)) {
+                if (method_exists($controller, $action)) {
+                    $controller = new $controller($params, self::GET);
                     $controller->$action();
+                    self::$flag = true;
                 } else {
-                    View::response_code(404, '404 Not Found');
+                    throw new ErrorException(`Method $action in class $controller does not exist`);
                 }
             } else {
-                View::response_code(404, '404 Not Found'); 
+                throw new ErrorException(`Class $controller does not exist`);
             }
-        } else {
-            View::response_code(404, '404 Not Found');
         }
     }
 
+    public static function check()
+    {
+        if (!self::$flag) {
+            echo '404 Not Found';
+        } else {
+            self::$flag = false;
+        }
+    }
 }

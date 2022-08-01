@@ -1,15 +1,9 @@
 <?php 
 
-return [
-    '' => [
-        'controller' => 'MainController',
-        'action' => 'index',
-        'view' => 'main/index',
-    ],
-    
-    'posts' => [
-        'controller' => 'PostController',
-        'action' => 'index',
-        'view' => 'post/index',
-    ]
-];
+use app\core\Route;
+
+Route::get('/', 'MainController@index');
+Route::get('/posts', 'PostController@index');
+Route::get('/news-page', 'NewsController@index');
+
+Route::check();
