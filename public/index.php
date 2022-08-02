@@ -1,7 +1,7 @@
 <?php 
 
 include '../app/classes/dev.php';
-include '../app/classes/response.php';
+include '../app/classes/basic.php';
 
 spl_autoload_register(function ($class) {
     $path = str_replace('\\', '/', '../' . $class . '.php');
