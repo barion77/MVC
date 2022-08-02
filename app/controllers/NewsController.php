@@ -3,13 +3,13 @@
 namespace app\controllers;
 
 use app\core\Controller;
-use app\database\DB;
+use app\core\View;
 
-class MainController extends Controller
+class NewsController extends Controller
 {
     public function index()
     {
         $this->view->layout = 'layouts.default';
-        $this->view->render(['content' => 'main.index'], ['count' => 10]);
+        $this->view->render(['content' => 'news.index'], ['count' => 20]);
     }
 }

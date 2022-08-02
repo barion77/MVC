@@ -3,7 +3,6 @@
 namespace app\core;
 
 use app\config\Config;
-use ErrorException;
 use Exception;
 
 class Route
@@ -29,16 +28,14 @@ class Route
                     if (Config::debug) {
                         throw new Exception(`Action: $action does not exist in $controller`);
                     } else {
-                        echo '404 Not Found';
-                        exit;
+                        abort(404, 'Not Found');
                     }
                 }
             } else {
                 if (Config::debug) {
                     throw new Exception(`Class: $controller does not exist`);
                 } else {
-                    echo '404 Not Found';
-                    exit;
+                    abort(404, 'Not Found');
                 }
             }
         }
@@ -63,16 +60,14 @@ class Route
                     if (Config::debug) {
                         throw new Exception(`Action: $action does not exist in $controller`);
                     } else {
-                        echo '404 Not Found';
-                        exit;
+                        abort(404, 'Not Found');
                     }
                 }
             } else {
                 if (Config::debug) {
                     throw new Exception(`Class: $controller does not exist`);
                 } else {
-                    echo '404 Not Found';
-                    exit;
+                    abort(404, 'Not Found');
                 }
             }
         }
@@ -81,8 +76,7 @@ class Route
     public static function check()
     {
         if (!in_array($_SERVER['REQUEST_URI'], self::$routes)) {
-            echo '<h1>404 Not Found</h1>';
-            exit;
+            abort(404, 'Not Found');
         }
     }
 }

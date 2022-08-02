@@ -4,37 +4,30 @@ namespace app\core;
 
 class View
 {
-    private $path;
-    public $route;
-    public $layout = 'default';
+    public $layout;
+    public static $sectionValues = [];
 
-    public function __construct($route)
+    public function render($views = [], $variables = [])
     {
-        $this->route = $route;
-        $this->path = $route['view'];
-    }
+        $this->layout = '../app/views/' . str_replace('.', '/', $this->layout) . '.php';
 
-    public function render($title_view_page, $variables = [])
-    {
-        if (file_exists('../app/views/' . $this->path . '.php')) {
+        if (file_exists($this->layout)) {
             extract($variables);
-            ob_start();
-            require '../app/views/' . $this->path . '.php';
-            $view_page = ob_get_clean();
-            require '../app/views/layouts/' . $this->layout . '.php';
-        } 
-    }
 
-    public function redirect($url)
-    {
-        header('Location: ' . $url);
-        exit;
-    }
+            foreach ($views as $view => $path) {
+                $path = '../app/views/' . str_replace('.', '/', $path) . '.php';
+                if (file_exists($path)) {
+                    ob_start();
+                    require '../app/classes/template.php';
+                    require $path;
+                    $views[$view] = ob_get_clean();
+                }
+            }
 
-    public static function response_code($code, $msg)
-    {
-        http_response_code($code);
-        require '../app/views/response.php';
-        exit;
+            extract($views);
+
+            require $this->layout;
+        }
     }
+    
 }

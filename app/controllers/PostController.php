@@ -9,10 +9,7 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = $this->model->getPosts();
-
-        $this->view->render('Посты', [
-            'posts' => $posts
-        ]);
+        $this->view->layout = 'layouts.default';
+        $this->view->render(['content' => 'post.index']);
     }
 }
