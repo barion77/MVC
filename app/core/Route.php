@@ -11,7 +11,7 @@ class Route
 
     public static function get($uri, $params)
     {
-        self::$routes[] = $uri;
+        self::$routes[] = $uri . '-' . 'GET';
         $method = $_SERVER['REQUEST_METHOD'];
         $current_uri = $_SERVER['REQUEST_URI'];
         $route = ['uri', 'params', 'method'];
@@ -43,7 +43,7 @@ class Route
 
     public static function post($uri, $params)
     {
-        self::$routes[] = $uri;
+        self::$routes[] = $uri . '-' . 'POST';
         $method = $_SERVER['REQUEST_METHOD'];
         $current_uri = $_SERVER['REQUEST_URI'];
         $route = ['uri', 'params', 'method'];
@@ -75,7 +75,7 @@ class Route
 
     public static function put($uri, $params)
     {
-        self::$routes[] = $uri;
+        self::$routes[] = $uri . '-' . 'PUT';
 
         $method = '';
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -114,7 +114,7 @@ class Route
 
     public static function patch($uri, $params)
     {
-        self::$routes[] = $uri;
+        self::$routes[] = $uri . '-' . 'PATCH';
 
         $method = '';
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -153,7 +153,7 @@ class Route
 
     public static function delete($uri, $params)
     {
-        self::$routes[] = $uri;
+        self::$routes[] = $uri . '-' . 'DELETE';
 
         $method = '';
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -192,7 +192,9 @@ class Route
 
     public static function check()
     {
-        if (!in_array($_SERVER['REQUEST_URI'], self::$routes)) {
+        $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
+
+        if (!in_array($_SERVER['REQUEST_URI'] . '-' . $method, self::$routes)) {
             abort(404, 'Not Found');
         }
     }
