@@ -2,6 +2,7 @@
 
 namespace app\database;
 
+use app\config\Config;
 use PDO;
 
 class DB 
@@ -11,8 +12,7 @@ class DB
 
     public function __construct()
     {
-        $config = require '../app/config/db.php';
-        $this->connect = new  PDO('mysql:host=' . $config['host'] . ';' . 'dbname=' . $config['dbname'] . '', $config['login'], $config['password']);
+        $this->connect = new PDO('mysql:host=' . Config::db_host . ';dbname=' . Config::db_name . '', Config::db_login, Config::db_password);
     }
 
     private function query($sql, $params = [])
@@ -28,6 +28,7 @@ class DB
         return $stmt;
     }
 
+
     public function row($sql, $params = []) 
     {
         $result = $this->query($sql, $params);
@@ -38,6 +39,12 @@ class DB
     {
         $result = $this->query($sql, $params);
         return $result->fetchColumn();
+    }
+
+    public function sqlExec($sql, $params)
+    {
+        $sql = $this->query($sql, $params);
+        $this->connect->exec($sql);
     }
 
 }

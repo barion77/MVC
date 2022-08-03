@@ -1,2 +1,12 @@
 <?php setValueSection('title', 'Новости') ?>
-<h1>Новости</h1>
+
+<form action="/news" method="POST">
+    <?php method('PUT'); ?>
+    <div class="form-group">
+        <input type="text">
+    </div>
+    <div class="form-group">
+        <input type="submit">
+    </div>
+
+</form>
