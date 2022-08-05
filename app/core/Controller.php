@@ -6,13 +6,11 @@ use app\core\View;
 
 abstract class Controller 
 {
-    public $route;
     public $model;
     public $view;
 
-    public function __construct($route)
+    public function __construct()
     {
-        $this->route = $route;
         $this->view = new View();
         $this->model = new Model();
     }

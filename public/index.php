@@ -1,15 +1,13 @@
 <?php 
 
-include '../app/classes/dev.php';
-include '../app/classes/basic.php';
-
-spl_autoload_register(function ($class) {
-    $path = str_replace('\\', '/', '../' . $class . '.php');
-    if (file_exists($path)) {
-        require $path;
-    }
-});
+use app\core\Route;
 
 session_start();
 
+include '../app/classes/dev.php';
+include '../app/classes/basic.php';
+
+require '../app/core/autoload.php';
 require '../app/config/routes.php';
+
+Route::check();

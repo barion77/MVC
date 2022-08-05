@@ -9,7 +9,6 @@ class MainController extends Controller
 {
     public function index()
     {
-        $this->view->layout = 'layouts.default';
-        $this->view->render(['content' => 'main.index'], ['count' => 10]);
+        return '123';
     }
 }
