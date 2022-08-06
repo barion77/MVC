@@ -2,7 +2,7 @@
 
 namespace app\core;
 
-use app\config\Config;
+use app\core\Config;
 use PDO;
 
 class Model 
@@ -12,7 +12,8 @@ class Model
 
     public function __construct()
     {
-        $this->connect = new PDO('mysql:host=' . Config::db_host . ';dbname=' . Config::db_name . '', Config::db_login, Config::db_password); 
+        $config = Config::getSection('database');
+        $this->connect = new PDO('mysql:host=' . $config['DB_HOST'] . ';dbname=' . $config['DB_DATABASE'] . '', $config['DB_USERNAME'], $config['DB_PASSWORD']); 
     }
 
     private function query($sql, $params = [])

@@ -4,10 +4,11 @@ use app\core\Route;
 
 session_start();
 
-include '../app/classes/dev.php';
-include '../app/classes/basic.php';
+include '../classes/dev.php';
+include '../classes/basic.php';
 
-require '../app/core/autoload.php';
-require '../app/config/routes.php';
+require '../classes/autoload.php';
+require '../routes/web.php';
 
 Route::check();
+

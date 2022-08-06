@@ -5,6 +5,7 @@ namespace app\core;
 class Route
 {  
     private static $routes = [];
+    private static $values = [];
 
     public static function get(string $uri, $callback)
     {
@@ -101,10 +102,12 @@ class Route
         $params = explode('@', $string);
         $controller = 'app\controllers\\' . $params[0];
         $action = $params[1];
-        $value = self::getValueFromUri(self::getUri());
+        if (self::getValueFromUri(self::getUri())) {
+            self::$values = array_combine(self::$values, self::getValueFromUri(self::getUri()));
+        }
 
         if (class_exists($controller) && method_exists($controller, $action)) {
-            $controller = new $controller($value);
+            $controller = new $controller(self::$values);
             return $controller->$action();
         } else {
             abort(404, 'Not Found');
@@ -121,22 +124,24 @@ class Route
 
     public static function prepareUri(string $uri)
     {
-        // TODO: Правильная замена множество флагов
-        $pattern = '/:[a-z\/]+/';
-        $uri = '#^' . preg_replace($pattern, '[0-9]+', trim($uri, '/')) . '$#';
+        $pattern = '/:[a-z]+/';
+        if (preg_match_all($pattern, $uri, $matches)) {
+            self::$values = array_map(function($flag) {
+                return trim($flag, ':');
+            }, $matches[0]);
+        }
 
+        $uri = '#^' . preg_replace($pattern, '[0-9]+', trim($uri, '/')) . '$#';
         return $uri;
     }
 
     public static function getValueFromUri(string $uri)
     {
-        // TODO: Получение значений нескольких флагов
         $pattern = '/[1-9]+/';
-        preg_match($pattern, $uri, $matches);
+        preg_match_all($pattern, $uri, $matches);
 
-        if (count($matches) > 0) {
-            $value = $matches[0];
-            return $value;
+        if (count($matches[0]) > 0) {
+            return $matches[0];
         }
     }
 

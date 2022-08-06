@@ -10,6 +10,11 @@ class NewsController extends Controller
     public function index()
     {
         $this->view->layout = 'layouts.default';
-        $this->view->render(['content' => 'news.index'], ['count' => 20]);
+        $this->view->render(['content' => 'news.index']);
+    }
+
+    public function update()
+    {
+        echo 'METHOD UPDATE';
     }
 }

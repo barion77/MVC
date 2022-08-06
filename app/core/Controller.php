@@ -8,12 +8,12 @@ abstract class Controller
 {
     public $model;
     public $view;
-    public $value;
+    public $values;
 
-    public function __construct($value = null)
+    public function __construct($values = null)
     {
         $this->view = new View();
         $this->model = new Model();
-        $this->value = $value;
+        $this->values = $values;
     }
 }
