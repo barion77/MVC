@@ -1,13 +1,20 @@
 <?php 
 
 use app\core\Route;
+use app\exceptions\RouteException;
 
 session_start();
 
-include '../classes/dev.php';
-include '../classes/basic.php';
+include '../app/classes/dev.php';
+include '../app/classes/basic.php';
 
-require '../classes/autoload.php';
+try {
+
+} catch (RouteException $e) {
+    exit($e->getMessage());
+}
+
+require '../app/classes/autoload.php';
 require '../routes/web.php';
 
 Route::check();

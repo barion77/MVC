@@ -18,7 +18,7 @@ class View
                 $path = '../app/views/' . str_replace('.', '/', $path) . '.php';
                 if (file_exists($path)) {
                     ob_start();
-                    require '../classes/templater.php';
+                    require '../app/classes/templater.php';
                     require $path;
                     $views[$view] = ob_get_clean();
                 }
