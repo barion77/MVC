@@ -11,7 +11,7 @@ class Route
 
     public static function get(string $uri, $callback)
     {
-        self::$routes['GET' . count(self::$routes)] = self::prepareUri($uri);
+        self::addRoute('GET' . count(self::$routes), self::prepareUri($uri));
         $method = $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -27,7 +27,7 @@ class Route
 
     public static function post(string $uri, $callback)
     {
-        self::$routes['GET' . count(self::$routes)] = self::prepareUri($uri);
+        self::addRoute('POST' . count(self::$routes), self::prepareUri($uri));
         $method = $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -43,7 +43,7 @@ class Route
 
     public static function put(string $uri, $callback)
     {
-        self::$routes['PUT' . count(self::$routes)] = self::prepareUri($uri);
+        self::addRoute('PUT' . count(self::$routes), self::prepareUri($uri));
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -59,7 +59,7 @@ class Route
 
     public static function patch(string $uri, $callback)
     {
-        self::$routes['PATCH' . count(self::$routes)] = self::prepareUri($uri);
+        self::addRoute('PATCH' . count(self::$routes), self::prepareUri($uri));
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -75,7 +75,7 @@ class Route
 
     public static function delete(string $uri, $callback)
     {
-        self::$routes['DELETE' . count(self::$routes)] = self::prepareUri($uri);
+        self::addRoute('DELETE' . count(self::$routes), self::prepareUri($uri));
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -148,6 +148,14 @@ class Route
 
         if (count($matches[0]) > 0) {
             return $matches[0];
+        }
+    }
+
+    public static function addRoute(string $key, string $route)
+    {
+        self::$routes[$key] = $route;
+        if (count(self::$routes) > count(array_unique(self::$routes))) {
+            throw new RouteException('This route already exists ' . $route);
         }
     }
 
