@@ -153,10 +153,11 @@ class Route
 
     public static function addRoute(string $key, string $route)
     {
+        // TODO: Проверка роута на уникальность 
         self::$routes[$key] = $route;
-        if (count(self::$routes) > count(array_unique(self::$routes))) {
-            throw new RouteException('This route already exists ' . $route);
-        }
+        // if (count(self::$routes) > count(array_unique(self::$routes))) {
+        //     throw new RouteException('This route already exists ' . $route);
+        // }
     }
 
     public static function check()
