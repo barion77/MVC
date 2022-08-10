@@ -3,6 +3,7 @@
 namespace app\core;
 
 use app\core\View;
+use app\models\Post;
 
 abstract class Controller 
 {
@@ -13,7 +14,7 @@ abstract class Controller
     public function __construct($values = null)
     {
         $this->view = new View();
-        $this->model = new Model();
+        $this->model = new Post();
         $this->values = $values;
     }
 }

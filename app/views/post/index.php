@@ -1,4 +1,3 @@
-<?php setValueSection('title', 'Посты'); ?>
 <h1>Страница постов</h1>
 <?php foreach($posts as $post) : ?>
     <div class="card">

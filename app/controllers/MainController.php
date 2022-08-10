@@ -8,7 +8,7 @@ class MainController extends Controller
 {
     public function index()
     {
-
-        return '123';
+        $this->view->layout = 'layouts.default';
+        $this->view->render('main.index', 'Главная страница', ['main' => 'Main Page']);
     }
 }

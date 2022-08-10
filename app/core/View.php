@@ -5,26 +5,26 @@ namespace app\core;
 class View
 {
     public $layout;
-    public static $sectionValues = [];
+    public $config;
 
-    public function render($views = [], $variables = [])
+    public function __construct()
     {
-        $this->layout = '../app/views/' . str_replace('.', '/', $this->layout) . '.php';
+        $this->config = require_once '../config/view.php';
+    }
 
+    public function render($view, $view_title, $variables = [])
+    {
+        $this->layout = $this->config['path'] . str_replace('.', '/', $this->layout) . '.php';
+        $view = $this->config['path'] . str_replace('.', '/', $view) . '.php';
         if (file_exists($this->layout)) {
             extract($variables);
-
-            foreach ($views as $view => $path) {
-                $path = '../app/views/' . str_replace('.', '/', $path) . '.php';
-                if (file_exists($path)) {
-                    ob_start();
-                    require '../app/classes/templater.php';
-                    require $path;
-                    $views[$view] = ob_get_clean();
-                }
+            unset($variables);
+            if (file_exists($view)) {
+                ob_start();
+                require $view;
+                unset($view);
+                $view_content = ob_get_clean();
             }
-
-            extract($views);
 
             require $this->layout;
         }
