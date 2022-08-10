@@ -8,9 +8,9 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = $this->model->row('SELECT * FROM posts');
+        $posts = $this->model->where('id', '>', '2')->limit(1)->get();
 
         $this->view->layout = 'layouts.default';
-        $this->view->render(['content' => 'post.index'], ['posts' => $posts]);
+        $this->view->render('post.index', 'Посты', ['posts' => $posts]);
     }
 }

@@ -2,48 +2,84 @@
 
 namespace app\core;
 
-use app\core\Config;
-use PDO;
+use \PDO;
 
 class Model 
 {
+    private $db;
     protected $table;
-    protected $connect;
+
+    private $where = [];
+    private $sort = '';
+    private $limit = '';
 
     public function __construct()
     {
-        $config = Config::getSection('database');
-        $this->connect = new PDO('mysql:host=' . $config['DB_HOST'] . ';dbname=' . $config['DB_DATABASE'] . '', $config['DB_USERNAME'], $config['DB_PASSWORD']); 
+       $this->db = Database::getInstance();
     }
 
-    private function query($sql, $params = [])
+    public function all()
     {
-        $stmt = $this->connect->prepare($sql);
-        if (!empty($params)) {
-            foreach ($params as $key => $value) {
-                $stmt->bindValue(':' . $key, $value);
-            }
-        }
-
-        $stmt->execute();
-        return $stmt;
-    }
-
-
-    public function row($sql, $params = []) 
-    {
-        $result = $this->query($sql, $params);
+        $result = $this->db->query('SELECT * FROM posts', $this->table);
         return $result->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function column($sql, $params = [])
+    public function create($data)
     {
-        $result = $this->query($sql, $params);
-        return $result->fetchColumn();
+        $keys = array_keys($data);
+        $fields = '(' . implode(', ', $keys) . ')';
+        $keys = array_map(function($value) {
+            return ':' . $value;
+        }, $keys);
+
+        $values = '(' . implode(', ', $keys) . ')';
+        $result = $this->db->query('INSERT INTO ' . $this->table . ' ' . $fields . ' VALUES ' . $values, $data);
     }
 
-    public function sqlExec($sql, $params = [])
+    public function where(string $column, string $operator, string $operand)
     {
-        $sql = $this->query($sql, $params);
+        $this->where[] = $column . " " . $operator . " '" . $operand . "'";
+
+        return $this;
+    }
+
+    public function limit(string $limit)
+    {
+        $this->limit = "LIMIT " . $limit;
+
+        return $this;
+    }
+
+    public function sort(string $sort)
+    {
+        $this->sort = $sort;
+
+        return $this;
+    }
+
+    private function prepareWhereRequest(array $conditions)
+    {
+        $request = '';
+        if (count($conditions) > 0) {
+            $request = "WHERE ";
+            foreach ($conditions as $key => $value) {
+                if (count($conditions) > 1 && count($conditions) != $key + 1) {
+                    $request .= $value . " AND ";
+                } else {
+                    $request .= $value;
+                }
+            }
+        }
+
+        return $request;
+    }   
+
+    public function get()
+    {
+        $where_request = $this->prepareWhereRequest($this->where);
+        $sql = "SELECT * FROM " . $this->table . " " . $where_request . " " . $this->sort . " " . $this->limit;
+
+        $result = $this->db->query(trim($sql, ' '));
+        return $result->fetchAll();
     }
 }
