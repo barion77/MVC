@@ -7,9 +7,9 @@ use app\core\Controller;
 class PostController extends Controller
 {
     public function index()
-    {
-        $posts = $this->model->where('id', '>', '2')->limit(1)->get();
-
+    {   
+        $posts = $this->model->row("SELECT * FROM posts");
+        
         $this->view->layout = 'layouts.default';
         $this->view->render('post.index', 'Посты', ['posts' => $posts]);
     }
