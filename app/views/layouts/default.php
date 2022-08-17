@@ -8,6 +8,7 @@
     <title><?php echo $view_title ?></title>
 </head>
 <body>
+    <?php echo $aside ?>
     <?php echo $view_content; ?>
 </body>
 </html>
