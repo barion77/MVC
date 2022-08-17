@@ -12,3 +12,7 @@ function redirect($url)
     header('Location: ' . $url);
     exit;
 }
+function logging($message)
+{
+    file_put_contents('../log/app.log', $message . "\r\n\r\n", FILE_APPEND);
+}

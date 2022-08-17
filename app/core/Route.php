@@ -5,7 +5,7 @@ namespace app\core;
 use app\exceptions\RouteException;
 
 class Route
-{  
+{ 
     private static $routes = [];
     private static $values = [];
 
@@ -113,8 +113,10 @@ class Route
             return $controller->$action();
         } else {
             if (Config::getField('APP_DEBUG')) {
+                logging('Class or method does not exists ' . $controller . ' method: ' . $action);
                 throw new RouteException('Class or method does not exists ' . $controller . ' method: ' . $action);
             } else {
+                logging('Class or method does not exists ' . $controller . ' method: ' . $action);
                 abort(404);
             }
         }
