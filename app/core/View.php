@@ -17,14 +17,14 @@ class View
         $this->layout = $this->config['path'] . str_replace('.', '/', $this->layout) . '.php';
         $view = $this->config['path'] . str_replace('.', '/', $view) . '.php';
         if (file_exists($this->layout)) {
+            extract($variables);
+            unset($variables);
             if ($include) {
                 $includes = $this->getIncludes();
                 extract($includes);
                 unset($includes);
             }
 
-            extract($variables);
-            unset($variables);
             unset($include);
             if (file_exists($view)) {
                 ob_start();
