@@ -115,7 +115,9 @@ class Route
             if (Config::getField('APP_DEBUG')) {
                 throw new RouteException('Class or method does not exists ' . $controller . ' method: ' . $action);
             } else {
-                logging('Class or method does not exists ' . $controller . ' method: ' . $action);
+                if (Config::getField('APP_LOG')) {
+                    logging('Class or method does not exists ' . $controller . ' method: ' . $action);
+                }
                 abort(404);
             }
         }

@@ -1,5 +1,6 @@
-<?php 
+<?php
 
+use app\core\Config;
 use app\core\Route;
 use app\exceptions\RouteException;
 
@@ -14,7 +15,9 @@ require '../routes/web.php';
 try {
 
 } catch (RouteException $e) {
-    logging($e->getMessage());
+    if (Config::getField('APP_LOG')) {
+        logging('Class or method does not exists ' . $controller . ' method: ' . $action);
+    }
     exit($e->getMessage());
 }
 
