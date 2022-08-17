@@ -6,7 +6,6 @@ class View
 {
     public $layout;
     public $config;
-    public $includes;
 
     public function __construct()
     {
