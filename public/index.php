@@ -14,6 +14,7 @@ require '../routes/web.php';
 try {
 
 } catch (RouteException $e) {
+    logging($e->getMessage());
     exit($e->getMessage());
 }
 

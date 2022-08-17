@@ -11,7 +11,7 @@ class Route
 
     public static function get(string $uri, $callback)
     {
-        self::addRoute('GET' . count(self::$routes), self::prepareUri($uri));
+        self::addRoute('GET', self::prepareUri($uri));
         $method = $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -27,7 +27,7 @@ class Route
 
     public static function post(string $uri, $callback)
     {
-        self::addRoute('POST' . count(self::$routes), self::prepareUri($uri));
+        self::addRoute('POST', self::prepareUri($uri));
         $method = $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -43,7 +43,7 @@ class Route
 
     public static function put(string $uri, $callback)
     {
-        self::addRoute('PUT' . count(self::$routes), self::prepareUri($uri));
+        self::addRoute('PUT', self::prepareUri($uri));
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -59,7 +59,7 @@ class Route
 
     public static function patch(string $uri, $callback)
     {
-        self::addRoute('PATCH' . count(self::$routes), self::prepareUri($uri));
+        self::addRoute('PATCH', self::prepareUri($uri));
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -75,7 +75,7 @@ class Route
 
     public static function delete(string $uri, $callback)
     {
-        self::addRoute('DELETE' . count(self::$routes), self::prepareUri($uri));
+        self::addRoute('DELETE', self::prepareUri($uri)); 
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -113,7 +113,6 @@ class Route
             return $controller->$action();
         } else {
             if (Config::getField('APP_DEBUG')) {
-                logging('Class or method does not exists ' . $controller . ' method: ' . $action);
                 throw new RouteException('Class or method does not exists ' . $controller . ' method: ' . $action);
             } else {
                 logging('Class or method does not exists ' . $controller . ' method: ' . $action);
@@ -153,13 +152,13 @@ class Route
         }
     }
 
-    public static function addRoute(string $key, string $route)
+    public static function addRoute(string $method, string $route)
     {
-        // TODO: Проверка роута на уникальность 
-        self::$routes[$key] = $route;
-        // if (count(self::$routes) > count(array_unique(self::$routes))) {
-        //     throw new RouteException('This route already exists ' . $route);
-        // }
+        if (!isset(self::$routes[$route]) || self::$routes[$route] != $method) {
+            self::$routes[$route] = $method;
+        } else {
+            throw new RouteException("Route [$route] already exists");
+        }
     }
 
     public static function check()
@@ -168,8 +167,7 @@ class Route
         $request_method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
         $flag = true;
 
-        foreach (self::$routes as $method => $uri) {
-            $method = preg_replace('/\d/', '', $method);
+        foreach (self::$routes as $uri => $method) {
             if (preg_match($uri, $request_uri)) {
                 if ($method == $request_method) {
                     $flag = false;
