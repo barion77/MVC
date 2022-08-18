@@ -5,17 +5,22 @@ namespace app\core;
 use app\exceptions\RouteException;
 
 class Route
-{ 
+{
     private static $routes = [];
     private static $values = [];
+    private static $patterns = [];
 
-    public static function get(string $uri, $callback)
+    private const PATTERN = '/:[a-z\d\._]+/';
+    private const DEFAULT_PATTERN = '[1-9]+';
+
+    public static function get(string $uri, $callback, $pattern = [])
     {
+        self::addPattern($pattern);
         self::addRoute('GET', self::prepareUri($uri));
         $method = $_SERVER['REQUEST_METHOD'];
-
-        if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
+        if (preg_match(self::prepareUri($uri), self::getUri())) {
             if ($method == 'GET') {
+                self::getValueFromUri($uri);
                 if (is_string($callback)) {
                     echo self::stringHandler($callback);
                 } else {
@@ -25,8 +30,9 @@ class Route
         }
     }
 
-    public static function post(string $uri, $callback)
+    public static function post(string $uri, $callback, $pattern = [])
     {
+        self::addPattern($pattern);
         self::addRoute('POST', self::prepareUri($uri));
         $method = $_SERVER['REQUEST_METHOD'];
 
@@ -41,13 +47,15 @@ class Route
         }
     }
 
-    public static function put(string $uri, $callback)
+    public static function put(string $uri, $callback, $pattern = [])
     {
+        self::addPattern($pattern);
         self::addRoute('PUT', self::prepareUri($uri));
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
             if ($method == 'PUT') {
+                self::getValueFromUri($uri);
                 if (is_string($callback)) {
                     echo self::stringHandler($callback);
                 } else {
@@ -57,13 +65,15 @@ class Route
         }
     }
 
-    public static function patch(string $uri, $callback)
+    public static function patch(string $uri, $callback, $pattern = [])
     {
+        self::addPattern($pattern);
         self::addRoute('PATCH', self::prepareUri($uri));
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
             if ($method == 'PATCH') {
+                self::getValueFromUri($uri);
                 if (is_string($callback)) {
                     echo self::stringHandler($callback);
                 } else {
@@ -73,13 +83,15 @@ class Route
         }
     }
 
-    public static function delete(string $uri, $callback)
+    public static function delete(string $uri, $callback, $pattern = [])
     {
-        self::addRoute('DELETE', self::prepareUri($uri)); 
+        self::addPattern($pattern);
+        self::addRoute('DELETE', self::prepareUri($uri));
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
             if ($method == 'DELETE') {
+                self::getValueFromUri($uri);
                 if (is_string($callback)) {
                     echo self::stringHandler($callback);
                 } else {
@@ -90,7 +102,7 @@ class Route
     }
 
 
-    public static function stringHandler($string) 
+    public static function stringHandler($string)
     {
         if (strpos($string, '@')) {
             return self::classHandler($string);
@@ -104,9 +116,6 @@ class Route
         $params = explode('@', $string);
         $controller = 'app\controllers\\' . $params[0];
         $action = $params[1];
-        if (self::getValueFromUri(self::getUri())) {
-            self::$values = array_combine(self::$values, self::getValueFromUri(self::getUri()));
-        }
 
         if (class_exists($controller) && method_exists($controller, $action)) {
             $controller = new $controller(self::$values);
@@ -128,29 +137,39 @@ class Route
         $uri = trim($_SERVER['REQUEST_URI'], '/');
         $uri = (strpos($uri, '?')) ? substr($uri, 0, strpos($uri, '?')) : $uri;
 
-        return $uri;
+        return trim($uri, '/');
     }
 
     public static function prepareUri(string $uri)
     {
-        $pattern = '/:[a-z]+/';
-        if (preg_match_all($pattern, $uri, $matches)) {
-            self::$values = array_map(function($flag) {
-                return trim($flag, ':');
-            }, $matches[0]);
+        $uri = trim($uri, '/');
+        preg_match_all(self::PATTERN, $uri, $matches);
+        foreach ($matches[0] as $parameter) {
+            $parameter = trim($parameter, ':');
+            if (isset(self::$patterns[$parameter])) {
+                $pattern = '/:' . $parameter . '/';
+                $replacement_pattern = self::$patterns[$parameter];
+                $uri = preg_replace($pattern, $replacement_pattern, $uri);
+            } else {
+                $pattern = '/:' . $parameter . '/';
+                $replacement_pattern = self::DEFAULT_PATTERN;
+                $uri = preg_replace($pattern, $replacement_pattern, $uri);
+            }
         }
-
-        $uri = '#^' . preg_replace($pattern, '[0-9]+', trim($uri, '/')) . '$#';
-        return $uri;
+        
+        return '#^' . $uri . '$#';
     }
 
-    public static function getValueFromUri(string $uri)
+    public static function getValueFromUri($uri)
     {
-        $pattern = '/[1-9]+/';
-        preg_match_all($pattern, $uri, $matches);
+        $uri = explode('/', trim($uri, '/'));
+        $current_uri = explode('/', self::getUri());
 
-        if (count($matches[0]) > 0) {
-            return $matches[0];
+        foreach ($uri as $key => $value) {
+            if (preg_match(self::PATTERN, $value)) {
+                $value = trim($value, ':');
+                self::$values[$value] = $current_uri[$key];
+            }
         }
     }
 
@@ -162,6 +181,16 @@ class Route
             throw new RouteException("Route [$route] already exists");
         }
     }
+
+    public static function addPattern($pattern)
+    {
+        if (!empty($pattern)) {
+            foreach ($pattern as $key => $value) {
+                self::$patterns[$key] = $value;
+            }
+        }
+    }
+
 
     public static function check()
     {

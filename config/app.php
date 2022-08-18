@@ -1,6 +1,7 @@
 <?php 
 
 return [
+
     // Status codes and messages 
     ['status_codes' => [
         401 => 'Bad Request',
