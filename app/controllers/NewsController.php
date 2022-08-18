@@ -9,12 +9,14 @@ class NewsController extends Controller
 {
     public function index()
     {
-        $this->view->layout = 'layouts.default';
-        $this->view->render(['content' => 'news.index']);
+        // $this->view->layout = 'layouts.default';
+        // $this->view->render(['content' => 'news.index']);
+
+        return '123';
     }
 
     public function update()
     {
-        echo 'METHOD UPDATE';
+        return $this->values['slug'];
     }
 }

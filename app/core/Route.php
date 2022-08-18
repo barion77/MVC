@@ -11,12 +11,13 @@ class Route
     private static $patterns = [];
 
     private const PATTERN = '/:[a-z\d\._]+/';
-    private const DEFAULT_PATTERN = '[1-9]+';
+    private const DEFAULT_PATTERN_ID = '[1-9]+';
+    private const DEFAULT_PATTERN_SLUG = '(?=.*[a-z]).+';
 
     public static function get(string $uri, $callback, $pattern = [])
     {
         self::addPattern($pattern);
-        self::addRoute('GET', self::prepareUri($uri));
+        self::addRoute(self::prepareUri($uri), 'GET');
         $method = $_SERVER['REQUEST_METHOD'];
         if (preg_match(self::prepareUri($uri), self::getUri())) {
             if ($method == 'GET') {
@@ -33,7 +34,7 @@ class Route
     public static function post(string $uri, $callback, $pattern = [])
     {
         self::addPattern($pattern);
-        self::addRoute('POST', self::prepareUri($uri));
+        self::addRoute(self::prepareUri($uri), 'POST');
         $method = $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -50,7 +51,7 @@ class Route
     public static function put(string $uri, $callback, $pattern = [])
     {
         self::addPattern($pattern);
-        self::addRoute('PUT', self::prepareUri($uri));
+        self::addRoute(self::prepareUri($uri), 'PUT');
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -68,7 +69,7 @@ class Route
     public static function patch(string $uri, $callback, $pattern = [])
     {
         self::addPattern($pattern);
-        self::addRoute('PATCH', self::prepareUri($uri));
+        self::addRoute(self::prepareUri($uri), 'PATCH');
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -86,7 +87,7 @@ class Route
     public static function delete(string $uri, $callback, $pattern = [])
     {
         self::addPattern($pattern);
-        self::addRoute('DELETE', self::prepareUri($uri));
+        self::addRoute(self::prepareUri($uri), 'DELETE');
         $method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
 
         if (preg_match(self::prepareUri($uri), self::getUri(), $matches)) {
@@ -152,11 +153,11 @@ class Route
                 $uri = preg_replace($pattern, $replacement_pattern, $uri);
             } else {
                 $pattern = '/:' . $parameter . '/';
-                $replacement_pattern = self::DEFAULT_PATTERN;
+                $replacement_pattern = $parameter == 'slug' ? self::DEFAULT_PATTERN_SLUG : self::DEFAULT_PATTERN_ID;
                 $uri = preg_replace($pattern, $replacement_pattern, $uri);
             }
         }
-        
+
         return '#^' . $uri . '$#';
     }
 
@@ -173,21 +174,21 @@ class Route
         }
     }
 
-    public static function addRoute(string $method, string $route)
+    public static function addRoute(string $uri, string $method)
     {
-        if (!isset(self::$routes[$route]) || self::$routes[$route] != $method) {
-            self::$routes[$route] = $method;
-        } else {
-            throw new RouteException("Route [$route] already exists");
+        foreach (self::$routes as $route) {
+            if ($route['uri'] == $uri && $route['method'] == $method) {
+                throw new RouteException("This route already exists [$uri - $method]");
+            }
         }
+
+        self::$routes[] = ['uri' => $uri, 'method' => $method];
     }
 
     public static function addPattern($pattern)
     {
-        if (!empty($pattern)) {
-            foreach ($pattern as $key => $value) {
-                self::$patterns[$key] = $value;
-            }
+        foreach ($pattern as $key => $value) {
+            self::$patterns[$key] = $value;
         }
     }
 
@@ -198,9 +199,9 @@ class Route
         $request_method = isset($_POST['_method']) ? $_POST['_method'] : $_SERVER['REQUEST_METHOD'];
         $flag = true;
 
-        foreach (self::$routes as $uri => $method) {
-            if (preg_match($uri, $request_uri)) {
-                if ($method == $request_method) {
+        foreach (self::$routes as $route) {
+            if (preg_match($route['uri'], $request_uri)) {
+                if ($route['method'] == $request_method) {
                     $flag = false;
                 }
             }
